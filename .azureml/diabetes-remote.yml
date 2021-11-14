@@ -1,0 +1,11 @@
+name: diabetes-remote-env
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - scikit-learn
+  - keras
+  - pandas
+  - pip
+  - pip:
+    - azureml-core

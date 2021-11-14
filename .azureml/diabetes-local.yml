@@ -1,0 +1,11 @@
+name: diabetes-local-env
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - scikit-learn
+  - keras
+  - pandas
+  - pip
+  - pip:
+    - azureml-sdk
