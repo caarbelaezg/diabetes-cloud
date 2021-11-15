@@ -8,7 +8,7 @@ import json
 # Import Flask for creating API
 from flask import Flask, request
 
-with open('./outputs/diabetes-rf.pkl', 'rb') as model_pkl:
+with open('./diabetes-rf.pkl', 'rb') as model_pkl:
     knn = pickle.load(model_pkl)
 
 columns= ['race', 'gender', 'discharge_disposition_id', 'admission_source_id',
