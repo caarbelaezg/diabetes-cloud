@@ -1,10 +1,9 @@
-import pandas as pd
 import os
+import argparse
+import pickle
+import pandas as pd
 
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import f1_score
-from sklearn.metrics import recall_score
 from sklearn.metrics import accuracy_score
 
 from sklearn.pipeline import Pipeline
@@ -14,13 +13,32 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 import pickle
+from azureml.core import Run
 
-if __name__ == "__main__":    
+run = Run.get_context()
 
-    #Datasets: Prep
-    PATH = os.path.join('..', 'data', 'cleanData.csv')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--data_path',
+        type=str,
+        default='.',
+        help='Path to the training data'
+    )
+
+    args = parser.parse_args()
+    print("===== DATA =====")
+    print("DATA PATH: " + args.data_path)
+    print("LIST FILES IN DATA PATH...")
+    print(os.listdir(args.data_path))
+    print("================")
+
+    PATH = os.path.join(args.data_path, os.listdir(args.data_path)[0])
+    print("================")
+    print(f'DataPath: {PATH}')
     df = pd.read_csv(PATH, index_col=[0])
 
+    # prepare diabetes data
     cat_features = ['race', 'gender', 'discharge_disposition_id', 'admission_source_id',
                 'medical_specialty', 'diag_1', 'diag_2', 'diag_3', 'max_glu_serum',
                 'A1Cresult', 'metformin', 'glimepiride', 'glipizide', 'glyburide',
@@ -51,21 +69,18 @@ if __name__ == "__main__":
     #Train and test data
     x_train, x_test, y_train, y_test = train_test_split(df[x], df[y], test_size=0.30, random_state=27)
     
-    x_test.to_csv('../data/x_test.csv')
-    y_test.to_csv('../data/y_test.csv')
 
     #ML Model: Random forest classifier
 
     rf1 = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', RandomForestClassifier())])
     rf1.fit(x_train, y_train)
-
-    #Predictions
     predictions=rf1.predict(x_test)
 
-    #Accuracy
     print(accuracy_score(y_test, predictions))
+    run.log('Accuracy model', accuracy_score(y_test, predictions))
 
-    #Registro
-    OUTPUT_PATH = os.path.join('..', 'outputs', 'diabetes_model.pkl')
-    with open(OUTPUT_PATH, 'wb') as model_pkl:
-        pickle.dump(rf1, model_pkl)
+    Pkl_Filename = "outputs/diabetes_model.pkl"  
+
+    with open(Pkl_Filename, 'wb') as file:  
+        pickle.dump(rf1, file)
+    print('Finished Training')

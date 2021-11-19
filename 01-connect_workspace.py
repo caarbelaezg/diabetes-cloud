@@ -10,3 +10,5 @@ ws = Workspace.get(
     auth=interactive_auth
 )
 ws.write_config(path='.azureml')
+
+
